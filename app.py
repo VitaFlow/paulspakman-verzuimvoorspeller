@@ -6,6 +6,8 @@ df = pd.read_excel("verzuim_voorspeller_prototype.xlsx")
 
 st.title("🔍 VerzuimVoorspeller Dashboard")
 
+st.write("Kolommen in de dataset:", df.columns.tolist())
+
 # Filters
 functie_filter = st.selectbox("Selecteer Functie:", ["Alle"] + sorted(df["Functie"].unique()))
 leeftijd_filter = st.slider("Leeftijdsfilter", 25, 60, (25, 60))
