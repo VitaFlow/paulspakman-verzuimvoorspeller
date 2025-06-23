@@ -5,9 +5,9 @@ import joblib
 
 # Modellen en data inladen
 df = pd.read_excel("verzuimdata_demo_met_verzuim.xlsx")
-clf_model = joblib.load("model_classification.pkl")
-reg_model = joblib.load("model_regression.pkl")
-model_features = joblib.load("model_features.pkl")
+clf_model = joblib.load("model_classification_streamlit13.pkl")
+reg_model = joblib.load("model_regression_streamlit13.pkl")
+features = joblib.load("model_features_streamlit13.pkl")
 
 # Voorbereiden features
 def prepare_input(data):
