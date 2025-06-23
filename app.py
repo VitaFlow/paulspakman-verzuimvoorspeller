@@ -3,7 +3,7 @@ import pandas as pd
 
 st.title("🔍 VerzuimVoorspeller Dashboard")
 
-df = pd.read_excel("verzuim_voorspeller_prototype.xlsx", header=1)
+df = pd.read_excel("verzuim_voorspeller_prototype.xlsx", header=0)
 
 df.columns = df.columns.str.strip().str.lower()
 
