@@ -4,7 +4,7 @@ import pandas as pd
 st.title("🔍 VerzuimVoorspeller Dashboard")
 
 # ✅ Excelbestand inladen
-df = pd.read_excel("verzuim_voorspeller_prototype.xlsx")
+df = pd.read_excel("verzuim_voorspeller_prototype.xlsx", header=1)
 
 # ✅ Kolomnamen normaliseren
 df.columns = df.columns.str.strip().str.lower()
