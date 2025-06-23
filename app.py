@@ -4,7 +4,7 @@ import joblib
 
 # Modellen en data inladen
 df = pd.read_excel("verzuimdata_demo_met_verzuim.xlsx")
-clf_model = joblib.load("model_classification_streamlit13.pk1")
+clf_model = joblib.load("model_classification_streamlit13.pkl")
 reg_model = joblib.load("model_regression_streamlit13.pkl")
 features = joblib.load("model_features_streamlit13.pkl")
 
@@ -33,7 +33,7 @@ st.subheader("🔮 Voorspellingen")
 st.metric("Kans op verzuim (komend jaar)", f"{verzuimkans:.0%}")
 st.metric("Verwachte verzuimdagen", f"{verwachte_dagen:.1f} dagen")
 
-# Uitlegbaarheid (vereenvoudigd)
+# Uitlegbaarheid
 st.subheader("📊 Invloedrijke factoren (vereenvoudigd)")
 feature_importances = pd.Series(clf_model.feature_importances_, index=features)
 top_factors = feature_importances.sort_values(ascending=False).head(5)
