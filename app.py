@@ -38,4 +38,3 @@ st.subheader("📊 Invloedrijke factoren (vereenvoudigd)")
 feature_importances = pd.Series(clf_model.feature_importances_, index=features)
 top_factors = feature_importances.sort_values(ascending=False).head(5)
 st.bar_chart(top_factors)
-
