@@ -1,6 +1,16 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
+
+# Zoek naar het juiste bestand in de map
+files = os.listdir(".")
+st.write("📂 Bestanden in map:", files)
+
+# Tijdelijk probeer alternatieve namen
+for f in files:
+    if "model_classification" in f:
+        st.write("🟢 GEVONDEN:", f)
 
 # Modellen en data inladen
 df = pd.read_excel("verzuimdata_demo_met_verzuim.xlsx")
