@@ -37,4 +37,18 @@ if "leeftijd" in filtered_df.columns:
 
 # ✅ Tabel en grafiek
 st.subheader("📊 Overzicht met risicoscores")
-if {"naam", "leeftijd", "functie", "totaalverzuim", "aantalverz
+if {"naam", "leeftijd", "functie", "totaalverzuim", "aantalverzuimmomenten", "laatsteverzuimdatum", "risicoscore", "risiconiveau"}.issubset(filtered_df.columns):
+    st.dataframe(filtered_df[[
+        "naam", "leeftijd", "functie", "totaalverzuim", "aantalverzuimmomenten",
+        "laatsteverzuimdatum", "risicoscore", "risiconiveau"
+    ]])
+else:
+    st.warning("⚠️ Niet alle verwachte kolommen aanwezig om de tabel te tonen.")
+
+# ✅ Risicoverdeling als grafiek
+if "risiconiveau" in filtered_df.columns:
+    st.subheader("📉 Risicoverdeling")
+    st.bar_chart(filtered_df["risiconiveau"].value_counts())
+else:
+    st.warning("⚠️ Kolom 'risiconiveau' niet gevonden.")
+
