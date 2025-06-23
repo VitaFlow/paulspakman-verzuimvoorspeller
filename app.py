@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
@@ -12,10 +11,10 @@ features = joblib.load("model_features_streamlit13.pkl")
 # Voorbereiden features
 def prepare_input(data):
     df_input = pd.get_dummies(data, drop_first=True)
-    for col in model_features:
+    for col in features:
         if col not in df_input.columns:
             df_input[col] = 0
-    return df_input[model_features]
+    return df_input[features]
 
 # Streamlit dashboard
 st.title("🧠 AI Verzuimvoorspeller")
@@ -36,7 +35,7 @@ st.metric("Verwachte verzuimdagen", f"{verwachte_dagen:.1f} dagen")
 
 # Uitlegbaarheid (vereenvoudigd)
 st.subheader("📊 Invloedrijke factoren (vereenvoudigd)")
-feature_importances = pd.Series(clf_model.feature_importances_, index=model_features)
+feature_importances = pd.Series(clf_model.feature_importances_, index=features)
 top_factors = feature_importances.sort_values(ascending=False).head(5)
 st.bar_chart(top_factors)
 
