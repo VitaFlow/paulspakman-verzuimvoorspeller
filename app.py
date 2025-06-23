@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 
 # Modellen en data inladen
-df = pd.read_excel("verzuimdata_simulatie_10jaar.xlsx")
+df = pd.read_excel("verzuimdata_demo_met_verzuim.xlsx")
 clf_model = joblib.load("model_classification.pkl")
 reg_model = joblib.load("model_regression.pkl")
 model_features = joblib.load("model_features.pkl")
