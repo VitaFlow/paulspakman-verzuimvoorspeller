@@ -7,7 +7,7 @@ df = pd.read_excel("verzuim_voorspeller_prototype.xlsx")
 st.title("🔍 VerzuimVoorspeller Dashboard")
 
 # Filters
-functie_filter = st.selectbox("Selecteer functie:", ["Alle"] + sorted(df["Functie"].unique()))
+functie_filter = st.selectbox("Selecteer Functie:", ["Alle"] + sorted(df["Functie"].unique()))
 leeftijd_filter = st.slider("Leeftijdsfilter", 25, 60, (25, 60))
 
 # Filter logica
