@@ -1,47 +1,42 @@
+
 import streamlit as st
 import pandas as pd
+import joblib
 
-st.title("🔍 VerzuimVoorspeller Dashboard")
+# Modellen en data inladen
+df = pd.read_excel("verzuimdata_simulatie_10jaar.xlsx")
+clf_model = joblib.load("model_classification.pkl")
+reg_model = joblib.load("model_regression.pkl")
+model_features = joblib.load("model_features.pkl")
 
-df = pd.read_excel("verzuim_voorspeller_prototype.xlsx", header=0)
+# Voorbereiden features
+def prepare_input(data):
+    df_input = pd.get_dummies(data, drop_first=True)
+    for col in model_features:
+        if col not in df_input.columns:
+            df_input[col] = 0
+    return df_input[model_features]
 
-df.columns = df.columns.str.strip().str.lower()
+# Streamlit dashboard
+st.title("🧠 AI Verzuimvoorspeller")
 
-st.write("📋 Kolommen in de dataset:", df.columns.tolist())
+selected = st.selectbox("Selecteer medewerker:", df["Naam"])
+record = df[df["Naam"] == selected]
+st.write("📋 Medewerkergegevens:", record.T)
 
-if "functie" in df.columns:
-    functie_filter = st.selectbox("Selecteer functie:", ["Alle"] + sorted(df["functie"].unique()))
-else:
-    st.error("❌ Kolom 'functie' niet gevonden in het Excelbestand.")
-    functie_filter = "Alle"
+X_input = prepare_input(record)
 
-if "leeftijd" in df.columns:
-    leeftijd_filter = st.slider("Leeftijdsfilter", 25, 60, (25, 60))
-else:
-    st.error("❌ Kolom 'leeftijd' niet gevonden in het Excelbestand.")
-    leeftijd_filter = (25, 60)
+# Voorspellingen
+verzuimkans = clf_model.predict_proba(X_input)[0][1]
+verwachte_dagen = reg_model.predict(X_input)[0]
 
-filtered_df = df.copy()
-if functie_filter != "Alle" and "functie" in filtered_df.columns:
-    filtered_df = filtered_df[filtered_df["functie"] == functie_filter]
-if "leeftijd" in filtered_df.columns:
-    filtered_df = filtered_df[
-        (filtered_df["leeftijd"] >= leeftijd_filter[0]) &
-        (filtered_df["leeftijd"] <= leeftijd_filter[1])
-    ]
+st.subheader("🔮 Voorspellingen")
+st.metric("Kans op verzuim (komend jaar)", f"{verzuimkans:.0%}")
+st.metric("Verwachte verzuimdagen", f"{verwachte_dagen:.1f} dagen")
 
-st.subheader("📊 Overzicht met risicoscores")
-if {"naam", "leeftijd", "functie", "totaalverzuim", "aantalverzuimmomenten", "laatsteverzuimdatum", "risicoscore", "risiconiveau"}.issubset(filtered_df.columns):
-    st.dataframe(filtered_df[[
-        "naam", "leeftijd", "functie", "totaalverzuim", "aantalverzuimmomenten",
-        "laatsteverzuimdatum", "risicoscore", "risiconiveau"
-    ]])
-else:
-    st.warning("⚠️ Niet alle verwachte kolommen aanwezig om de tabel te tonen.")
-
-if "risiconiveau" in filtered_df.columns:
-    st.subheader("📉 Risicoverdeling")
-    st.bar_chart(filtered_df["risiconiveau"].value_counts())
-else:
-    st.warning("⚠️ Kolom 'risiconiveau' niet gevonden.")
+# Uitlegbaarheid (vereenvoudigd)
+st.subheader("📊 Invloedrijke factoren (vereenvoudigd)")
+feature_importances = pd.Series(clf_model.feature_importances_, index=model_features)
+top_factors = feature_importances.sort_values(ascending=False).head(5)
+st.bar_chart(top_factors)
 
