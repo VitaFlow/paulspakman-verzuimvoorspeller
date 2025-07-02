@@ -2,13 +2,27 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Modellen en data inladen
-df = pd.read_excel("verzuimdata_simulatie_uitgebreid.xlsx")
-clf_model = joblib.load("model_classification_streamlit.pkl")
-reg_model = joblib.load("model_regression_streamlit.pkl")
-model_features = joblib.load("model_features_streamlit.pkl")
+# Data inladen
+bestand = "verzuimdata_demo_met_verzuim.xlsx"
+df = pd.read_excel(bestand)
 
-# Voorbereiden features
+# Nieuwe kolom toevoegen: dagen sinds laatste verzuim
+if 'laatsteverzuimdatum' in df.columns:
+    df['dagen_sinds_verzuim'] = (pd.Timestamp.today() - pd.to_datetime(df['laatsteverzuimdatum'])).dt.days
+
+# Features instellen
+features = [
+    "leeftijd", "geslacht", "functie", "contracttype", "uren_per_week",
+    "thuiswerken", "mentale_belasting", "fysieke_belasting", "werkstress", "tevredenheid",
+    "aantal_verzuimmomenten", "duur_in_dienst", "leidinggevende", "sector",
+    "dagen_sinds_verzuim"
+]
+
+# Modellen inladen
+clf_model = joblib.load("model_classification_streamlit13.pkl")
+reg_model = joblib.load("model_regression_streamlit13.pkl")
+
+# Functie om input klaar te maken voor predictie
 def prepare_input(data):
     df_input = pd.get_dummies(data, drop_first=True)
     for col in features:
@@ -16,7 +30,7 @@ def prepare_input(data):
             df_input[col] = 0
     return df_input[features]
 
-# Streamlit dashboard
+# Streamlit UI
 st.title("🧠 AI Verzuimvoorspeller")
 
 selected = st.selectbox("Selecteer medewerker:", df["Naam"])
@@ -33,7 +47,7 @@ st.subheader("🔮 Voorspellingen")
 st.metric("Kans op verzuim (komend jaar)", f"{verzuimkans:.0%}")
 st.metric("Verwachte verzuimdagen", f"{verwachte_dagen:.1f} dagen")
 
-# Uitlegbaarheid
+# Belangrijkste factoren
 st.subheader("📊 Invloedrijke factoren (vereenvoudigd)")
 feature_importances = pd.Series(clf_model.feature_importances_, index=features)
 top_factors = feature_importances.sort_values(ascending=False).head(5)
