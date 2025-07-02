@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Data inladen
-bestand = "verzuimdata_demo_met_verzuim.xlsx"
+bestand = "verzuimdata_met_extra_features.xlsx"
 df = pd.read_excel(bestand)
 
 # Nieuwe kolom toevoegen: dagen sinds laatste verzuim
