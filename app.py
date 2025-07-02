@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 
+st.write("📋 Kolommen in de dataset:", df.columns.tolist())
+
 # Inladen data en modellen
 df = pd.read_excel("hr_verzuim_dataset_50.xlsx")  # Bestand moet in je projectmap staan
 clf_model = joblib.load("model_classification_streamlit13.pkl")
@@ -41,7 +43,7 @@ if contract_filter != "Alle":
 # Kritieke medewerkers tonen
 st.subheader("🚨 Kritieke medewerkers (hoogste risico)")
 if "risicoscore" in df_filtered.columns:
-    kritieke = df_filtered.sort_values("risicoscore", ascending=False).head(10)
+    kritieke = df_filtered.sort_values("risicoscore", ascending=False)
     st.dataframe(kritieke[["Naam", "Afdeling", "Functie", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]])
 else:
     st.warning("⚠️ 'risicoscore' kolom niet gevonden. Controleer of voorspelling is toegepast.")
