@@ -25,6 +25,9 @@ df_pred["Verzuimkans"] = clf_model.predict_proba(X)[:, 1]
 df_pred["VerwachteVerzuimdagen"] = reg_model.predict(X)
 df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
 
+st.write("✅ Kolommen in df_pred:", df_pred.columns.tolist())
+st.write("✅ Sample data:", df_pred[["Naam", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]].head())
+
 # Sidebarfilters
 st.sidebar.title("📊 Filters")
 afdeling_filter = st.sidebar.selectbox("Afdeling", ["Alle"] + sorted(df_pred["Afdeling"].unique()))
@@ -46,7 +49,8 @@ if "risicoscore" in df_filtered.columns:
     kritieke = df_filtered.sort_values("risicoscore", ascending=False)
     st.dataframe(kritieke[["Naam", "Afdeling", "Functie", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]])
 else:
-    st.warning("⚠️ 'risicoscore' kolom niet gevonden. Controleer of voorspelling is toegepast.")
+    st.warning("❌ Kolom 'risicoscore' niet gevonden in de gefilterde data.")
+    st.write("📋 Beschikbare kolommen:", df_filtered.columns.tolist())
 
 # Individuele medewerker selecteren
 st.subheader("👤 Detail per medewerker")
