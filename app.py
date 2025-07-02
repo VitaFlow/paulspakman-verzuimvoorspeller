@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-st.write("📋 Kolommen in de dataset:", df.columns.tolist())
-
 # Inladen data en modellen
 df = pd.read_excel("hr_verzuim_dataset_50.xlsx")  # Bestand moet in je projectmap staan
 clf_model = joblib.load("model_classification_streamlit13.pkl")
 reg_model = joblib.load("model_regression_streamlit13.pkl")
 model_features = joblib.load("model_features_streamlit13.pkl")
+
+st.write("📋 Kolommen in de dataset:", df.columns.tolist())
 
 # Functie om input voor het model klaar te maken
 def prepare_input(data):
