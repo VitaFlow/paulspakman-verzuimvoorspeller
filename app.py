@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# 📂 Data en modellen laden
+# Laad modellen en features
 df = pd.read_excel("hr_verzuim_dataset_50.xlsx")
-clf_model = joblib.load("model_classification.pkl")
-reg_model = joblib.load("model_regression.pkl")
-model_features = joblib.load("model_features.pkl")
+clf_model = joblib.load("model_classification_streamlit13.pkl")
+reg_model = joblib.load("model_regression_streamlit13.pkl")
+model_features = joblib.load("model_features_streamlit13.pkl")
 
-# 🧮 Functie om input klaar te maken
+# Eén-hot encoding + missende features aanvullen
 def prepare_input(data):
     df_input = pd.get_dummies(data, drop_first=True)
     for col in model_features:
@@ -16,48 +16,47 @@ def prepare_input(data):
             df_input[col] = 0
     return df_input[model_features]
 
-# 🎛️ Sidebar filters
-st.sidebar.header("🔍 Filter medewerkers")
-afdelingen = st.sidebar.multiselect("Afdeling", options=df["Afdeling"].unique(), default=list(df["Afdeling"].unique()))
-functies = st.sidebar.multiselect("Functie", options=df["Functie"].unique(), default=list(df["Functie"].unique()))
-contracttypes = st.sidebar.multiselect("Contracttype", options=df["Contracttype"].unique(), default=list(df["Contracttype"].unique()))
+# Verwerk voorspellingen voor alle medewerkers
+df_predictions = df.copy()
+X_all = prepare_input(df_predictions)
+df_predictions["Verzuimkans"] = clf_model.predict_proba(X_all)[:, 1]
+df_predictions["Verwachte dagen"] = reg_model.predict(X_all)
+df_predictions["risicoscore"] = df_predictions["Verzuimkans"] * df_predictions["Verwachte dagen"]
 
-df_filtered = df[
-    df["Afdeling"].isin(afdelingen) &
-    df["Functie"].isin(functies) &
-    df["Contracttype"].isin(contracttypes)
-].copy()
+# Sidebar filters
+st.sidebar.title("🔎 Filters")
+afdelingen = ["Alle"] + sorted(df_predictions["Afdeling"].unique())
+functies = ["Alle"] + sorted(df_predictions["Functie"].unique())
+contracttypes = ["Alle"] + sorted(df_predictions["Contracttype"].unique())
 
-# 🧠 Modelvoorspellingen toepassen
-verzuimkansen = []
-verwachte_dagen = []
+afdeling_selectie = st.sidebar.selectbox("Afdeling", afdelingen)
+functie_selectie = st.sidebar.selectbox("Functie", functies)
+contract_selectie = st.sidebar.selectbox("Contracttype", contracttypes)
 
-for i, row in df_filtered.iterrows():
-    input_row = prepare_input(pd.DataFrame([row]))
-    kans = clf_model.predict_proba(input_row)[0][1]
-    dagen = reg_model.predict(input_row)[0]
-    verzuimkansen.append(kans)
-    verwachte_dagen.append(dagen)
+# Filter toepassen
+df_filtered = df_predictions.copy()
+if afdeling_selectie != "Alle":
+    df_filtered = df_filtered[df_filtered["Afdeling"] == afdeling_selectie]
+if functie_selectie != "Alle":
+    df_filtered = df_filtered[df_filtered["Functie"] == functie_selectie]
+if contract_selectie != "Alle":
+    df_filtered = df_filtered[df_filtered["Contracttype"] == contract_selectie]
 
-df_filtered["Verzuimkans"] = verzuimkansen
-df_filtered["Verwachte dagen"] = verwachte_dagen
-df_filtered["risicoscore"] = df_filtered["Verzuimkans"] * df_filtered["Verwachte dagen"]
-
-# 📌 Kritieke medewerkers tonen
-st.title("🧠 AI Verzuimvoorspeller")
+# Toon kritieke medewerkers
 st.subheader("🚨 Kritieke medewerkers (hoogste risico eerst)")
 kritieke = df_filtered.sort_values("risicoscore", ascending=False).head(10)
 st.dataframe(kritieke[["Naam", "Afdeling", "Functie", "Verzuimkans", "Verwachte dagen", "risicoscore"]])
 
-# 📋 Individuele medewerker selecteren
-st.subheader("📋 Bekijk individuele medewerker")
-selected = st.selectbox("Selecteer medewerker:", df_filtered["Naam"])
-record = df_filtered[df_filtered["Naam"] == selected]
-st.write("🧾 Medewerkergegevens:", record.T)
+# Medewerkerselectie
+st.subheader("👤 Details per medewerker")
+geselecteerde = st.selectbox("Selecteer medewerker:", df_filtered["Naam"])
+record = df_filtered[df_filtered["Naam"] == geselecteerde]
 
-# 📊 Top 5 voorspelfactoren
-st.subheader("📊 Belangrijkste voorspelfactoren (model)")
-importances = pd.Series(clf_model.feature_importances_, index=model_features)
-top_factors = importances.sort_values(ascending=False).head(5)
+st.write("📋 Gegevens:", record.T)
+
+# Uitlegbaarheid
+st.subheader("📊 Invloedrijke factoren")
+feature_importances = pd.Series(clf_model.feature_importances_, index=model_features)
+top_factors = feature_importances.sort_values(ascending=False).head(5)
 st.bar_chart(top_factors)
 
