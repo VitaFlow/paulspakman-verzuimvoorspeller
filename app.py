@@ -52,12 +52,12 @@ if contract_filter != "Alle":
 # Kritieke medewerkers tonen
 st.subheader("🚨 Kritieke medewerkers (hoogste risico)")
 if "risicoscore" in df_filtered.columns:
-    st.write("🚨 Beschikbare kolommen in df_filtered:", df_filtered.columns.tolist())
     kritieke = df_filtered.sort_values("risicoscore", ascending=False)
     st.dataframe(kritieke[["Naam", "Afdeling", "Functie", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]])
 else:
-    st.warning("❌ Kolom 'risicoscore' niet gevonden in de gefilterde data.")
+    st.warning("❌ Kolom 'risicoscore' niet aanwezig in de gefilterde data.")
     st.write("📋 Beschikbare kolommen:", df_filtered.columns.tolist())
+    st.write("🔍 Mogelijke oorzaak: filters leveren een lege of niet-voorspelde dataset op.")
 
 # Individuele medewerker selecteren
 st.subheader("👤 Detail per medewerker")
