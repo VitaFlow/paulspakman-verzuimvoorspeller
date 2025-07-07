@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Inladen data en modellen
-df = pd.read_excel("hr_verzuim_dataset_50.xlsx")
+df = pd.read_excel("hr_verzuimdata_hr_50.xlsx")
 clf_model = joblib.load("model_classification_streamlit13.pkl")
 reg_model = joblib.load("model_regression_streamlit13.pkl")
 model_features = joblib.load("model_features_streamlit13.pkl")
