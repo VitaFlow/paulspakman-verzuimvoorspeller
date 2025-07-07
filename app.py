@@ -21,6 +21,8 @@ def prepare_input(data):
 # AI-voorspellingen toepassen op gehele dataset
 df_pred = df.copy()
 X = prepare_input(df_pred)
+st.write("✅ Vorm inputdata voor model:", X.shape)
+st.write("✅ Kolommen inputmodel:", X.columns.tolist())
 df_pred["Verzuimkans"] = clf_model.predict_proba(X)[:, 1]
 df_pred["VerwachteVerzuimdagen"] = reg_model.predict(X)
 df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
