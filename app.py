@@ -23,9 +23,12 @@ df_pred = df.copy()
 X = prepare_input(df_pred)
 st.write("✅ Vorm inputdata voor model:", X.shape)
 st.write("✅ Kolommen inputmodel:", X.columns.tolist())
-df_pred["Verzuimkans"] = clf_model.predict_proba(X)[:, 1]
-df_pred["VerwachteVerzuimdagen"] = reg_model.predict(X)
-df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
+try:
+    df_pred["Verzuimkans"] = clf_model.predict_proba(X)[:, 1]
+    df_pred["VerwachteVerzuimdagen"] = reg_model.predict(X)
+    df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
+except Exception as e:
+    st.error(f"❌ Er ging iets mis bij de voorspellingen: {e}")
 
 st.write("✅ Kolommen in df_pred:", df_pred.columns.tolist())
 st.write("✅ Sample data:", df_pred[["Naam", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]].head())
