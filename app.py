@@ -2,15 +2,13 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Inladen data en modellen
-df = pd.read_excel("hr_verzuim_dataset_50.xlsx")  # Bestand moet in je projectmap staan
+# Data & modellen laden
+df = pd.read_excel("hr_verzuim_dataset_50.xlsx")  # Zorg dat dit in dezelfde map staat
 clf_model = joblib.load("model_classification_streamlit13.pkl")
 reg_model = joblib.load("model_regression_streamlit13.pkl")
 model_features = joblib.load("model_features_streamlit13.pkl")
 
-st.write("📋 Kolommen in de dataset:", df.columns.tolist())
-
-# Functie om input voor het model klaar te maken
+# Functie voor inputvoorbereiding
 def prepare_input(data):
     df_input = pd.get_dummies(data, drop_first=True)
     for col in model_features:
@@ -18,29 +16,18 @@ def prepare_input(data):
             df_input[col] = 0
     return df_input[model_features]
 
-# AI-voorspellingen toepassen op gehele dataset
+# 🔮 Voorspellingen toepassen
 df_pred = df.copy()
 X = prepare_input(df_pred)
-st.write("✅ Vorm inputdata voor model:", X.shape)
-st.write("✅ Kolommen inputmodel:", X.columns.tolist())
-try:
-    df_pred["Verzuimkans"] = clf_model.predict_proba(X)[:, 1]
-    df_pred["VerwachteVerzuimdagen"] = reg_model.predict(X)
-    df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
-except Exception as e:
-    st.error(f"❌ Er ging iets mis bij de voorspellingen: {e}")
+df_pred["Verzuimkans"] = clf_model.predict_proba(X)[:, 1]
+df_pred["VerwachteVerzuimdagen"] = reg_model.predict(X)
 
-df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
-st.write("✅ Kolommen in df_pred:", df_pred.columns.tolist())
-st.write("✅ Sample data:", df_pred[["Naam", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]].head())
-
-# Sidebarfilters
+# Filters in de sidebar
 st.sidebar.title("📊 Filters")
 afdeling_filter = st.sidebar.selectbox("Afdeling", ["Alle"] + sorted(df_pred["Afdeling"].unique()))
 functie_filter = st.sidebar.selectbox("Functie", ["Alle"] + sorted(df_pred["Functie"].unique()))
 contract_filter = st.sidebar.selectbox("Contracttype", ["Alle"] + sorted(df_pred["Contracttype"].unique()))
 
-# Filter toepassen op df_pred (en dus niet op df!)
 df_filtered = df_pred.copy()
 if afdeling_filter != "Alle":
     df_filtered = df_filtered[df_filtered["Afdeling"] == afdeling_filter]
@@ -49,24 +36,20 @@ if functie_filter != "Alle":
 if contract_filter != "Alle":
     df_filtered = df_filtered[df_filtered["Contracttype"] == contract_filter]
 
-# Kritieke medewerkers tonen
-st.subheader("🚨 Kritieke medewerkers (hoogste risico)")
-if "risicoscore" in df_filtered.columns:
-    kritieke = df_filtered.sort_values("risicoscore", ascending=False)
-    st.dataframe(kritieke[["Naam", "Afdeling", "Functie", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]])
-else:
-    st.warning("❌ Kolom 'risicoscore' niet aanwezig in de gefilterde data.")
-    st.write("📋 Beschikbare kolommen:", df_filtered.columns.tolist())
-    st.write("🔍 Mogelijke oorzaak: filters leveren een lege of niet-voorspelde dataset op.")
-
-# Individuele medewerker selecteren
-st.subheader("👤 Detail per medewerker")
+# Selecteer medewerker
+st.title("🧠 AI Verzuimvoorspeller")
 selected = st.selectbox("Selecteer medewerker:", df_filtered["Naam"])
 record = df_filtered[df_filtered["Naam"] == selected]
-st.write("📋 Medewerkergegevens:", record.T)
+st.write("📋 Medewerkergegevens", record.T)
+
+# Toon voorspellingen
+st.subheader("🔮 AI-voorspellingen")
+st.metric("Kans op verzuim (komend jaar)", f"{record['Verzuimkans'].values[0]:.0%}")
+st.metric("Verwachte verzuimdagen", f"{record['VerwachteVerzuimdagen'].values[0]:.1f} dagen")
 
 # Belangrijkste factoren
 st.subheader("📈 Belangrijkste AI-factoren")
 feature_importances = pd.Series(clf_model.feature_importances_, index=model_features)
 st.bar_chart(feature_importances.sort_values(ascending=False).head(5))
+
 
