@@ -52,6 +52,7 @@ if contract_filter != "Alle":
 # Kritieke medewerkers tonen
 st.subheader("🚨 Kritieke medewerkers (hoogste risico)")
 if "risicoscore" in df_filtered.columns:
+    st.write("🚨 Beschikbare kolommen in df_filtered:", df_filtered.columns.tolist())
     kritieke = df_filtered.sort_values("risicoscore", ascending=False)
     st.dataframe(kritieke[["Naam", "Afdeling", "Functie", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]])
 else:
