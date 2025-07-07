@@ -30,6 +30,7 @@ try:
 except Exception as e:
     st.error(f"❌ Er ging iets mis bij de voorspellingen: {e}")
 
+df_pred["risicoscore"] = df_pred["Verzuimkans"] * df_pred["VerwachteVerzuimdagen"]
 st.write("✅ Kolommen in df_pred:", df_pred.columns.tolist())
 st.write("✅ Sample data:", df_pred[["Naam", "Verzuimkans", "VerwachteVerzuimdagen", "risicoscore"]].head())
 
